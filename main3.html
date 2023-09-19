@@ -163,6 +163,23 @@
             text-align: left;
         }
         }
+
+        /* Add this CSS code to resize the heart icons */
+        .heart {
+            width: 30px; /* Adjust the width as needed */
+            height: 30px; /* Adjust the height as needed */
+            margin-right: 5px; /* Optional: Add some spacing between the hearts */
+            margin-top: 20px;
+        }
+
+        /* Add this CSS code to resize the heart icons */
+        .heart1 {
+            width: 30px; /* Adjust the width as needed */
+            height: 30px; /* Adjust the height as needed */
+            margin-right: 5px; /* Optional: Add some spacing between the hearts */
+            margin-top: 20px;
+            margin-left: 35%;
+        }
         
     </style>
 </head>
@@ -187,7 +204,11 @@
             <div id="feedbackMessage"></div> 
             <button type="submit"id="guessButton">Guess</button>
         </div>
-        
+        <div id="livesDisplay">
+            <img src="heart.png" alt="Heart" id="heart1" class="heart1">
+            <img src="heart.png" alt="Heart" id="heart2" class="heart">
+            <img src="heart.png" alt="Heart" id="heart3" class="heart">
+        </div>
     </div>
 
     <script>
@@ -214,7 +235,7 @@
                 'Corki.jpg',
                 'Darius.jpg',
                 'Diana.jpg',
-                'Dr.Mundo.jpg',
+                'Dr. Mundo.jpg',
                 'Draven.jpg',
                 'Elise.jpg',
                 'Evelynn.jpg',
@@ -343,7 +364,7 @@
                 'Corki',
                 'Darius',
                 'Diana',
-                'Dr.Mundo',
+                'Dr. Mundo',
                 'Draven',
                 'Elise',
                 'Evelynn',
@@ -457,8 +478,22 @@
             var guessButton = document.getElementById("guessButton");
             var feedbackMessage = document.getElementById("feedbackMessage");
 
+            // Retrieve the score and streak from localStorage
+            var score = parseInt(localStorage.getItem("score")) || 0;
+            var streak = parseInt(localStorage.getItem("streak")) || 1;
+
+            // Add this line to define the lives variable
+            var lives = 3; // Set the initial number of lives
+
             // Randomly select an index from the imagePaths array
             var randomIndex = Math.floor(Math.random() * imagePaths.length);
+
+
+            function saveScore() {
+                // Save the score and streak to localStorage
+                localStorage.setItem("score", score.toString());
+                localStorage.setItem("streak", streak.toString());
+            }
 
             /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
             function myFunction() {
@@ -549,19 +584,63 @@
 
                 if (userGuess === correctAnswer) {
                     feedbackMessage.textContent = "Correct!";
+
+                    // Calculate the score based on the streak and add it to the total score
+                    score += 100 * streak;
+                    streak++;
+
+                    // Display the updated score
+                    feedbackMessage.textContent += " Score: " + score;
+                    saveScore();
+
                     // Display a new random cropped image
                     setTimeout(refreshPage, 1500);
                     
                 } else {
-                    feedbackMessage.textContent = "Incorrect. Try again!";
-                    
+                    // Decrement lives
+                    lives--;
+                    score -= 100; // Deduct 100 points for a wrong guess
+                    // Update lives display (hearts)
+                    updateHeartIcons();
+
+                    feedbackMessage.textContent = "Incorrect. Try again! Your current score: " +score;
+
                     console.log("user's guess:"+userGuess);
                     console.log("correct answer:"+correctAnswer);
+
+                    // Reset the streak
+                    streak = 1;
+                    saveScore();
+
+                    if (lives === 0) {
+                        // Game over logic here, e.g., show a message or redirect to a game over page
+                        alert("Game Over! You're out of lives.");
+
+                        score = 0;
+                        saveScore();
+                        // Clear localStorage at the beginning to start fresh
+                        // Optionally, you can also refresh the page or reset the game
+                        setTimeout(refreshPage, 1500);
+                    }
                 }
 
                 // Clear the input field
                 guessInput.value = "";
 
+            }
+
+            function updateHeartIcons() {
+                // Loop through all hearts and hide them if they exceed the remaining lives
+                for (var i = 1; i <= 3; i++) {
+                    var heart = document.getElementById("heart" + i);
+                    if (i > lives) {
+                        // Hide the heart if it exceeds the remaining lives
+                        heart.style.display = "none";
+                    } else {
+                        // Show the heart if it corresponds to a remaining life
+                        heart.style.display = "inline-block";
+                    }
+                }
             }
 
             function autocomplete(inp, arr) {
